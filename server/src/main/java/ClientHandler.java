@@ -42,9 +42,7 @@ public class ClientHandler {
                         doBroadcast = false;
                         try {
                             String[] parts = message.split(" ");
-                            if(parts[1].equals(username)) {
-                                sendMessage(parts[2]);
-                            }
+                            server.broadcastMessage(parts[2], parts[1]);
                         } finally {
 
                         }

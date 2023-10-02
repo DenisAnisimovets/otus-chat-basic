@@ -14,7 +14,7 @@ public class Server {
     }
 
     public void start() {
-        try(ServerSocket serverSocket = new ServerSocket(port)) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 System.out.println("Сервер запущен на порту " + port);
                 Socket socket = serverSocket.accept();
@@ -35,6 +35,15 @@ public class Server {
         System.out.println(message + " это сообщение");
         for (ClientHandler client : clients) {
             client.sendMessage(message);
+        }
+    }
+
+    public synchronized void broadcastMessage(String message, String username) {
+        System.out.println(message + " это сообщение");
+        for (ClientHandler client : clients) {
+            if(client.getUsername().equals(username)) {
+                client.sendMessage(message);
+            }
         }
     }
 

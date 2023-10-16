@@ -38,7 +38,7 @@ public class Server {
         }
     }
 
-    public synchronized void broadcastMessage(String message, String username) {
+    public synchronized void sendMessageToUser(String message, String username) {
         System.out.println(message + " это сообщение");
         for (ClientHandler client : clients) {
             if(client.getUsername().equals(username)) {

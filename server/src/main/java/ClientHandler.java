@@ -48,12 +48,11 @@ public class ClientHandler {
                     }
                     if(message.startsWith("/kick")) {
                         String[] parts = message.split(" ");
-                        System.out.println("кикают" + parts[1]);
                         User currentUser = server.getAuthenticationProvider().findUserByUserName(username);
                         if(currentUser.getRole().equals(Roles.ADMIN)) {
                             server.unsubscribe(currentUser);
                         } else {
-                            System.out.println("Пользователь не админ. Его роль: " + username);
+                            System.out.println("Пользователь не админ. Он не может удалять из чата");
                         }
                     }
                     if(doBroadcast) {

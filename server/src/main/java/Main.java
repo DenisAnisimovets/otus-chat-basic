@@ -6,7 +6,7 @@ public class Main {
         if (args.length >= 1) {
             port = Integer.parseInt(args[0]);
         }
-        Server server = new Server(port);
+        Server server = new Server(port, new InMemoryAuthenticationProvider());
         server.start();
     }
 }

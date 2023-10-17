@@ -7,9 +7,23 @@ import java.util.List;
 public class Server {
     private int port;
     private List<ClientHandler> clients;
+    private final AuthenticationProvider authenticationProvider;
 
-    public Server(int port) {
+//    public ClientHandler findClientHandlerByUserName(String username) {
+//        for (ClientHandler clientHandler : clients
+//        ) {
+//            if(clientHandler.getUsername().equals(username)) return clientHandler;
+//        }
+//        return null;
+//    }
+
+    public AuthenticationProvider getAuthenticationProvider() {
+        return authenticationProvider;
+    }
+
+    public Server(int port, AuthenticationProvider authenticationProvider) {
         this.port = port;
+        this.authenticationProvider = authenticationProvider;
         clients = new ArrayList<>();
     }
 
@@ -45,6 +59,15 @@ public class Server {
                 client.sendMessage(message);
             }
         }
+    }
+
+    public void unsubscribe(User user) {
+        for (ClientHandler clintHandler: clients
+             ) {
+            if(clintHandler.getUsername().equals(user.getUsername())) {
+                unsubscribe(clintHandler);
+            }
+        };
     }
 
     public void unsubscribe(ClientHandler clientHandler) {

@@ -23,7 +23,7 @@ public class ClientHandler {
         this.server = server;
         in = new DataInputStream(socket.getInputStream());
         out = new DataOutputStream(socket.getOutputStream());
-        server.subscribe(this);
+       // server.subscribe(this);
         new Thread(() -> {
             try {
                 authenticateUser(server);
@@ -50,7 +50,10 @@ public class ClientHandler {
                         String[] parts = message.split(" ");
                         User currentUser = server.getAuthenticationProvider().findUserByUserName(username);
                         if(currentUser.getRole().equals(Roles.ADMIN)) {
-                            server.unsubscribe(currentUser);
+                            ClientHandler clientHandler = server.findClientHandlerByUserName(parts[1]);
+                            if(clientHandler != null) {
+                                server.unsubscribe(clientHandler);
+                            }
                         } else {
                             System.out.println("Пользователь не админ. Он не может удалять из чата");
                         }
@@ -103,6 +106,7 @@ public class ClientHandler {
                         sendMessage(nick + ", добро пожаловать в чат!");
                         server.subscribe(this);
                         isAuthenticated = true;
+                        server.subscribe(this);
                     }
                     break;
                 }

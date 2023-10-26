@@ -9,13 +9,13 @@ public class Server {
     private List<ClientHandler> clients;
     private final AuthenticationProvider authenticationProvider;
 
-//    public ClientHandler findClientHandlerByUserName(String username) {
-//        for (ClientHandler clientHandler : clients
-//        ) {
-//            if(clientHandler.getUsername().equals(username)) return clientHandler;
-//        }
-//        return null;
-//    }
+    public ClientHandler findClientHandlerByUserName(String username) {
+        for (ClientHandler clientHandler : clients
+        ) {
+            if(clientHandler.getUsername().equals(username)) return clientHandler;
+        }
+        return null;
+    }
 
     public AuthenticationProvider getAuthenticationProvider() {
         return authenticationProvider;

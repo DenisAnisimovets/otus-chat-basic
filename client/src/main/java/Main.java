@@ -36,7 +36,7 @@ public class Main extends JFrame implements Runnable {
         this.network.setCallback(new Callback() {
             @Override
             public void call(Object... args) {
-                outTextArea.append((String) args[0]);
+                outTextArea.append((String) args[0] +  '\n');
             }
         });
     }

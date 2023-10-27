@@ -36,7 +36,7 @@ public class Main extends JFrame implements Runnable {
         this.network.setCallback(new Callback() {
             @Override
             public void call(Object... args) {
-                outTextArea.append((String) args[0]);
+                outTextArea.append((String) args[0] +  '\n');
             }
         });
     }
@@ -49,7 +49,7 @@ public class Main extends JFrame implements Runnable {
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 String msg = scanner.nextLine();
-                network.sendMeassage(msg);
+                network.sendMessage(msg);
             }
 
         } catch (IOException e) {

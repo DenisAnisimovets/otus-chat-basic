@@ -2,6 +2,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class ClientHandler {
     private Socket socket;
@@ -14,6 +19,12 @@ public class ClientHandler {
 
     private static int userCount = 0;
 
+    private Connection connection;
+
+    static final String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
+    static final String USER = "postgres";
+    static final String PASS = "root";
+
     public String getUsername() {
         return username;
     }
@@ -23,7 +34,7 @@ public class ClientHandler {
         this.server = server;
         in = new DataInputStream(socket.getInputStream());
         out = new DataOutputStream(socket.getOutputStream());
-       // server.subscribe(this);
+        // server.subscribe(this);
         new Thread(() -> {
             try {
                 authenticateUser(server);
@@ -77,36 +88,85 @@ public class ClientHandler {
 //            /auth login password
 //            /register login nick password
             String[] args = message.split(" ");
+            System.out.println("команда " + args[0]);
             String command = args[0];
             switch (command) {
                 case "/auth": {
                     String login = args[1];
                     String password = args[2];
-                    String username = server.getAuthenticationProvider().getUsernameByLoginAndPassword(login, password);
-                    if (username == null || username.isBlank()) {
-                        sendMessage("Указан неверный логин/пароль");
-                    } else {
-                        this.username = username;
-                        sendMessage(username + ", добро пожаловать в чат!");
-                        server.subscribe(this);
-                        isAuthenticated = true;
+                    try {
+                        connection = getConnection();
+                        PreparedStatement st = null;
+                        System.out.println("Ищем в базе" + login);
+                        st = connection.prepareStatement("SELECT login FROM logins where login = ?");
+                        st.setString(1, login);
+                        ResultSet resultSet = st.executeQuery();
+                        if(resultSet.next()) {
+                            username = resultSet.getString(1);
+                            sendMessage(username + ", добро пожаловать в чат!");
+                            server.subscribe(this);
+                            isAuthenticated = true;
+                        } else {
+                            System.out.println("такого пользователя нет");
+                        }
+                    } catch (SQLException | ClassNotFoundException e) {
+                        e.printStackTrace();
                     }
+//                    String username = server.getAuthenticationProvider().getUsernameByLoginAndPassword(login, password);
+//                    if(username == null || username.isBlank()) {
+//                        sendMessage("Указан неверный логин/пароль");
+//                    } else {
+//                        this.username = username;
+//                        sendMessage(username + ", добро пожаловать в чат!");
+//                        server.subscribe(this);
+//                        isAuthenticated = true;
+//                    }
                     break;
                 }
                 case "/register": {
+                    System.out.println("Пытаемся зарегать пользака");
                     String login = args[1];
                     String nick = args[2];
                     String password = args[3];
                     String role = args[4];
-                    boolean isRegistred = server.getAuthenticationProvider().register(login, password, nick, role);
-                    if (!isRegistred) {
+                    //boolean isRegistred = server.getAuthenticationProvider().register(login, password, nick, role);
+                    boolean isRegistred = false;
+                    try {
+                        connection = getConnection();
+                        PreparedStatement st = null;
+                        System.out.println("Ищем в базе" + login);
+                        st = connection.prepareStatement("SELECT login FROM logins where login = ?");
+                        st.setString(1, login);
+                        ResultSet resultSet = st.executeQuery();
+                        if(resultSet.next()) {
+                            isRegistred = true;
+                            System.out.println("такой пользователь есть");
+                        } else {
+                            System.out.println("такого пользователя нет");
+                        }
+                    } catch (SQLException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    if(isRegistred) {
                         sendMessage("Указанный логин/никнейм уже заняты");
                     } else {
-                        this.username = nick;
-                        sendMessage(nick + ", добро пожаловать в чат!");
-                        server.subscribe(this);
-                        isAuthenticated = true;
-                        server.subscribe(this);
+                        try {
+                            connection = getConnection();
+                            PreparedStatement st = null;
+                            st = connection.prepareStatement("INSERT INTO logins (login, role) VALUES (?, ?)");
+                            st.setString(1, login);
+                            st.setString(2, role);
+                            int isDone = st.executeUpdate();
+                            if(isDone > 0) {
+                                this.username = nick;
+                                sendMessage(nick + ", добро пожаловать в чат!");
+                                server.subscribe(this);
+                                isAuthenticated = true;
+                                server.subscribe(this);
+                            }
+                        } catch (SQLException | ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
                 }
@@ -115,6 +175,12 @@ public class ClientHandler {
                 }
             }
         }
+
+    }
+
+    private Connection getConnection() throws SQLException, ClassNotFoundException {
+        Class.forName("org.postgresql.Driver");
+        return DriverManager.getConnection(DB_URL, USER, PASS);
     }
 
     public void disconnect() {

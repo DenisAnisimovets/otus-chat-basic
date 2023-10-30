@@ -29,6 +29,13 @@ public class Server {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+//            try {
+//                Class.forName("org.postgresql.Driver");
+//            } catch (ClassNotFoundException e) {
+//                System.out.println("PostgreSQL JDBC Driver is not found. Include it in your library path ");
+//                e.printStackTrace();
+//                return;
+//            }
             while (true) {
                 System.out.println("Сервер запущен на порту " + port);
                 Socket socket = serverSocket.accept();
@@ -62,12 +69,13 @@ public class Server {
     }
 
     public void unsubscribe(User user) {
-        for (ClientHandler clintHandler: clients
-             ) {
+        for (ClientHandler clintHandler : clients
+        ) {
             if(clintHandler.getUsername().equals(user.getUsername())) {
                 unsubscribe(clintHandler);
             }
-        };
+        }
+        ;
     }
 
     public void unsubscribe(ClientHandler clientHandler) {

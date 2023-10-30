@@ -101,13 +101,12 @@ public class ClientHandler {
                         st = connection.prepareStatement("SELECT login FROM logins where login = ?");
                         st.setString(1, login);
                         ResultSet resultSet = st.executeQuery();
-                        while (resultSet.next()) {
+                        if(resultSet.next()) {
                             username = resultSet.getString(1);
                             sendMessage(username + ", добро пожаловать в чат!");
                             server.subscribe(this);
                             isAuthenticated = true;
-                        }
-                         {
+                        } else {
                             System.out.println("такого пользователя нет");
                         }
                     } catch (SQLException | ClassNotFoundException e) {
